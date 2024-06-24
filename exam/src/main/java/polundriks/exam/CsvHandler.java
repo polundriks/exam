@@ -16,7 +16,7 @@ import java.util.Arrays;
  * @author super
  */
 
-public class CsvImporter {
+public class CsvHandler {
 
     public static ArrayList<Object> CsvImport(String fileName) throws IOException, CsvValidationException {
         CSVReader csvReader = new CSVReaderBuilder(new FileReader(fileName)).build();

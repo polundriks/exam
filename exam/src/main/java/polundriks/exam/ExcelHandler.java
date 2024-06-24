@@ -18,7 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ExcelImporter {
+public class ExcelHandler {
 
     public static ArrayList<Object> importFromExcel(int sheetNum, File file, int firstColumn, int firstString) throws IOException, InvalidFormatException {
         //создание объекта книги
