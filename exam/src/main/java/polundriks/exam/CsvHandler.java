@@ -1,4 +1,3 @@
-
 package polundriks.exam;
 
 import com.opencsv.*;
@@ -15,48 +14,46 @@ import java.util.Objects;
 
 public class CsvHandler {
 
-    public static ArrayList<ArrayList<Object>> CsvImport(File file, int[] params) throws IOException, CsvException {
-
+    public static ArrayList<ArrayList<Object>> csvImport(File file, int startRow, int rowCount) throws IOException, CsvException {
         CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
-        CSVReader csvReader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
-        ArrayList<ArrayList<Object>> data = new ArrayList<>();
-        List<String[]> rows = csvReader.readAll();
-        while (Objects.equals(rows.get(0)[0], "")) {
-            rows.remove(0);
-        }
-        for (int i = params[0] - 1, t = 1; i < params[1] + params[0] - 1 && i < rows.size(); i++) {
-            ArrayList<Object> objectRow = new ArrayList<>();
-            for (int j = 0; j < rows.get(i).length; j++) {
-                if (rows.get(i)[j].isBlank()) {
-                    rows.get(i)[j] = rows.get(i)[j - t] + t;
-                    t++;
+        try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build()) {
+            ArrayList<ArrayList<Object>> data = new ArrayList<>();
+            List<String[]> rows = csvReader.readAll();
+            rows.removeIf(row -> Objects.equals(row[0], ""));
+
+            int endRow = Math.min(startRow + rowCount - 1, rows.size());
+            for (int i = startRow - 1; i < endRow; i++) {
+                ArrayList<Object> objectRow = new ArrayList<>();
+                int t = 1;
+
+                for (int j = 0; j < rows.get(i).length; j++) {
+                    if (rows.get(i)[j].isBlank()) {
+                        rows.get(i)[j] = rows.get(i)[j - t] + t;
+                        t++;
+                    } else {
+                        t = 1;
+                    }
+                    objectRow.add(rows.get(i)[j]);
                 }
+                data.add(objectRow);
             }
-            t = 1;
-            objectRow.addAll(Arrays.asList(rows.get(i)));
-            data.add(objectRow);
+            return data;
         }
-        System.out.println(data);
-        return data;
     }
 
-    public static void ExportToCsv(ArrayList<ArrayList<Object>> objects, int[] params, String[] columnNames, File file) throws IOException {
-        CSVWriter writer = new CSVWriter(new FileWriter(file));
-        for (int i = 0; i < params[0] - 1; i++) {
-            objects.remove(0);
-        }
-        if (columnNames != null && columnNames.length > 0) {
-            objects.add(0, new ArrayList<>(Arrays.asList(columnNames)));
-        }
-        for (int i = 0; i < params[1] && i < objects.size(); i++) {
-            ArrayList<Object> row = objects.get(i);
-            String[] rowData = new String[row.size()];
-            for (int j = 0; j < row.size(); j++) {
-                rowData[j] = row.get(j).toString();
+    public static void exportToCsv(ArrayList<ArrayList<Object>> objects, int startRow, int rowCount, String[] columnNames, File file) throws IOException {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(file))) {
+            if (columnNames != null && columnNames.length > 0) {
+                writer.writeNext(columnNames);
+                startRow++;
             }
-            writer.writeNext(rowData);
+
+            int endRow = Math.min(startRow + rowCount - 1, objects.size());
+            for (int i = startRow - 1; i < endRow; i++) {
+                ArrayList<Object> row = objects.get(i);
+                String[] rowData = row.stream().map(Object::toString).toArray(String[]::new);
+                writer.writeNext(rowData);
+            }
         }
-        writer.close();
     }
 }
-
