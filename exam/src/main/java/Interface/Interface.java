@@ -6,7 +6,6 @@ package Interface;
  * @author super
  */
 
-
 import com.opencsv.exceptions.CsvException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import polundriks.exam.CsvHandler;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -100,7 +101,8 @@ public class Interface {
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = excelFileChooser.getSelectedFile();
 
-                JFrame excelFrame = new JFrame("Параметры Excel файла");
+                JDialog excelFrame = new JDialog(frame, "Параметры Excel файла", true);
+
                 excelFrame.setSize(300, 200);
                 JPanel excelPanel = new JPanel();
                 excelFrame.add(excelPanel);
@@ -128,18 +130,19 @@ public class Interface {
                 confirmButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        params[0] = (Integer.parseInt(sheetNumberField.getText()) - 1);
-                        params[1] = (Integer.parseInt(startRowField.getText()));
-                        params[2] = (Integer.parseInt(startColumnField.getText()));
-                        params[3] = (Integer.parseInt(allRowsField.getText()));
                         try {
+                            params[0] = (Integer.parseInt(sheetNumberField.getText()) - 1);
+                            params[1] = (Integer.parseInt(startRowField.getText()));
+                            params[2] = (Integer.parseInt(startColumnField.getText()));
+                            params[3] = (Integer.parseInt(allRowsField.getText()));
                             objects = ExcelHandler.importFromExcel(selectedFile, params);
                             String[] columnHeaders = new String[objects.get(0).size()];
                             for (int i = 0; i < objects.get(0).size(); i++) {
                                 columnHeaders[i] = objects.get(0).get(i).toString();
                             }
                             JList<String> list = new JList<>(columnHeaders);
-                            JFrame listFrame = new JFrame("Параметры Excel файла");
+                            JDialog listFrame = new JDialog(excelFrame, "Параметры Excel файла", true);
+                            listFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                             listFrame.setSize(400, 300);
                             JPanel listPanel = new JPanel();
                             listFrame.add(listPanel);
@@ -164,37 +167,39 @@ public class Interface {
                                     finalListModel.addElement(selectedValue);
                                 }
                             });
-                            listFrame.setVisible(true);
-                            listButton.addActionListener(new ActionListener() {
-                                                             @Override
-                                                             public void actionPerformed(ActionEvent e) {
-                                                                 ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                                                 Object[] chosenHeaders = new Object[finalListModel.getSize()];
-                                                                 for (int i = 0; i < finalListModel.getSize(); i++) {
-                                                                     chosenHeaders[i] = finalListModel.getElementAt(i);
-                                                                 }
-                                                                 int[] chosenHeaderIndexes = new int[chosenHeaders.length];
-                                                                 for (int i = 0; i < chosenHeaders.length; i++) {
-                                                                     chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
-                                                                 }
-                                                                 System.out.println(chosenHeaderIndexes);
-                                                                 for (int j = 0; j < objects.size(); j++) {
-                                                                     ArrayList<Object> newRow = new ArrayList<>();
-                                                                     for (int i : chosenHeaderIndexes) {
-                                                                         newRow.add(objects.get(j).get(i));
-                                                                     }
-                                                                     newObjects.add(newRow);
-                                                                 }
-                                                                 objects = newObjects;
-                                                                 showTable();
-                                                                 exportExcelButton.setEnabled(true);
-                                                                 exportCsvButton.setEnabled(true);
-                                                                 listFrame.dispose();
-                                                             }
-                                                         }
+                            listButton.addActionListener(e1 -> {
+                                        ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                        Object[] chosenHeaders = new Object[finalListModel.getSize()];
+                                        for (int i = 0; i < finalListModel.getSize(); i++) {
+                                            chosenHeaders[i] = finalListModel.getElementAt(i);
+                                        }
+                                        int[] chosenHeaderIndexes = new int[chosenHeaders.length];
+                                        for (int i = 0; i < chosenHeaders.length; i++) {
+                                            chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
+                                        }
+                                        System.out.println(chosenHeaderIndexes);
+                                        for (int j = 0; j < objects.size(); j++) {
+                                            ArrayList<Object> newRow = new ArrayList<>();
+                                            for (int i : chosenHeaderIndexes) {
+                                                newRow.add(objects.get(j).get(i));
+                                            }
+                                            newObjects.add(newRow);
+                                        }
+                                        objects = newObjects;
+                                        showTable();
+                                        exportExcelButton.setEnabled(true);
+                                        exportCsvButton.setEnabled(true);
+                                        excelFrame.dispose();
+                                        listFrame.dispose();
+                                    }
                             );
+                            listFrame.setVisible(true);
                         } catch (IOException | InvalidFormatException ex) {
-                            throw new RuntimeException(ex);
+                            JOptionPane.showMessageDialog(excelFrame, "Некорректный файл");
+                        } catch (NumberFormatException formatException) {
+                            JOptionPane.showMessageDialog(excelFrame, "Неверный формат указанных данных");
+                        } catch (IndexOutOfBoundsException | IllegalArgumentException argumentException) {
+                            JOptionPane.showMessageDialog(excelFrame, "Введены некорректные данные");
                         }
                         excelFrame.dispose();
                     }
@@ -214,7 +219,7 @@ public class Interface {
                 File selectedFile = csvFileChooser.getSelectedFile();
 
                 // Дополнительное окно для выбора параметров Excel файла
-                JFrame csvFrame = new JFrame("Параметры Csv файла");
+                JDialog csvFrame = new JDialog(frame, "Параметры Csv файла", true);
                 csvFrame.setSize(300, 200);
                 JPanel csvPanel = new JPanel();
                 csvFrame.add(csvPanel);
@@ -234,10 +239,9 @@ public class Interface {
                 confirmButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        params[0] = (Integer.parseInt(startRowField.getText()));
-                        params[1] = (Integer.parseInt(startRowAmountField.getText()));
-                        csvFrame.dispose(); // Закрыть окно после подтверждения
                         try {
+                            params[0] = (Integer.parseInt(startRowField.getText()));
+                            params[1] = (Integer.parseInt(startRowAmountField.getText()));
                             objects = CsvHandler.CsvImport(selectedFile, params);
                             int headersRow = 0;
                             if (objects.get(headersRow).get(0).toString().isBlank()) {
@@ -248,7 +252,7 @@ public class Interface {
                                 columnHeaders[i] = objects.get(headersRow).get(i).toString();
                             }
                             JList<String> list = new JList<>(columnHeaders);
-                            JFrame listFrame = new JFrame("Параметры Excel файла");
+                            JDialog listFrame = new JDialog(csvFrame, "Параметры Excel файла", true);
                             listFrame.setSize(400, 300);
                             JPanel listPanel = new JPanel();
                             listFrame.add(listPanel);
@@ -273,38 +277,38 @@ public class Interface {
                                     finalListModel.addElement(selectedValue);
                                 }
                             });
-                            listFrame.setVisible(true);
-                            listButton.addActionListener(new ActionListener() {
-                                                             @Override
-                                                             public void actionPerformed(ActionEvent e) {
-                                                                 ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                                                 Object[] chosenHeaders = new Object[finalListModel.getSize()];
-                                                                 for (int i = 0; i < finalListModel.getSize(); i++) {
-                                                                     chosenHeaders[i] = finalListModel.getElementAt(i);
-                                                                 }
-                                                                 int[] chosenHeaderIndexes = new int[chosenHeaders.length];
-                                                                 for (int i = 0; i < chosenHeaders.length; i++) {
-                                                                     chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
-                                                                 }
-                                                                 System.out.println(chosenHeaderIndexes);
-                                                                 for (int j = 0; j < objects.size(); j++) {
-                                                                     ArrayList<Object> newRow = new ArrayList<>();
-                                                                     for (int i : chosenHeaderIndexes) {
-                                                                         newRow.add(objects.get(j).get(i));
-                                                                     }
-                                                                     newObjects.add(newRow);
-                                                                 }
-                                                                 objects = newObjects;
-                                                                 showTable();
-                                                                 listFrame.dispose();
-                                                                 exportExcelButton.setEnabled(true);
-                                                                 exportCsvButton.setEnabled(true);
-                                                             }
-                                                         }
+                            listButton.addActionListener(e12 -> {
+                                        ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                        Object[] chosenHeaders = new Object[finalListModel.getSize()];
+                                        for (int i = 0; i < finalListModel.getSize(); i++) {
+                                            chosenHeaders[i] = finalListModel.getElementAt(i);
+                                        }
+                                        int[] chosenHeaderIndexes = new int[chosenHeaders.length];
+                                        for (int i = 0; i < chosenHeaders.length; i++) {
+                                            chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
+                                        }
+                                        System.out.println(chosenHeaderIndexes);
+                                        for (int j = 0; j < objects.size(); j++) {
+                                            ArrayList<Object> newRow = new ArrayList<>();
+                                            for (int i : chosenHeaderIndexes) {
+                                                newRow.add(objects.get(j).get(i));
+                                            }
+                                            newObjects.add(newRow);
+                                        }
+                                        objects = newObjects;
+                                        showTable();
+                                        listFrame.dispose();
+                                        exportExcelButton.setEnabled(true);
+                                        exportCsvButton.setEnabled(true);
+                                    }
                             );
-                        } catch (IOException |
-                                 CsvException ex) {
-                            throw new RuntimeException(ex);
+                            listFrame.setVisible(true);
+                        } catch (IOException | CsvException ex) {
+                            JOptionPane.showMessageDialog(csvFrame, "Некорректный файл");
+                        } catch (NumberFormatException formatException) {
+                            JOptionPane.showMessageDialog(csvFrame, "Неверный формат указанных данных");
+                        } catch (IndexOutOfBoundsException | IllegalArgumentException argumentException) {
+                            JOptionPane.showMessageDialog(csvFrame, "Введены некорректные данные");
                         }
                     }
                 });
@@ -316,7 +320,7 @@ public class Interface {
         exportExcelButton.addActionListener(e -> {
             int[] params = new int[4];
 
-            JFrame excelExportFrame = new JFrame("Параметры Excel файла");
+            JDialog excelExportFrame = new JDialog(frame, "Параметры Excel файла", true);
             excelExportFrame.setSize(300, 200);
             JPanel excelExportPanel = new JPanel();
             excelExportFrame.add(excelExportPanel);
@@ -336,7 +340,7 @@ public class Interface {
             chooseColumnNames.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    JFrame chooseColumnNames = new JFrame("Ввод названий столбцов");
+                    JDialog chooseColumnNames = new JDialog(excelExportFrame, "Ввод названий столбцов", true);
                     chooseColumnNames.setSize(300, 200);
                     JPanel panel = new JPanel();
                     JLabel label = new JLabel("Введите названия колонок через точку с запятой:");
@@ -354,7 +358,6 @@ public class Interface {
                             chooseColumnNames.dispose();
                         }
                     });
-
                     chooseColumnNames.setVisible(true);
                 }
             });
@@ -373,81 +376,85 @@ public class Interface {
             confirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    params[0] = (Integer.parseInt(firstRowField.getText()));
-                    params[1] = (Integer.parseInt(allRowsField.getText()));
-                    params[2] = (Integer.parseInt(statRowField.getText()));
-                    params[3] = (Integer.parseInt(startColumnField.getText()));
-                    String[] columnHeaders = new String[objects.get(0).size()];
-                    for (int i = 0; i < objects.get(0).size(); i++) {
-                        columnHeaders[i] = objects.get(0).get(i).toString();
-                    }
-                    JList<String> list = new JList<>(columnHeaders);
-                    JFrame listFrame = new JFrame("Параметры Excel файла");
-                    listFrame.setSize(400, 300);
-                    JPanel listPanel = new JPanel();
-                    listFrame.add(listPanel);
-                    JScrollPane listScrollPane = new JScrollPane(list);
-                    listScrollPane.setBounds(50, 30, 200, 250);
-                    listPanel.add(listScrollPane);
-                    DefaultListModel<String> finalListModel = new DefaultListModel<>();
-                    JList<String> finalList = new JList<>(finalListModel);
-                    JScrollPane finalListScrollPane = new JScrollPane(finalList);
-                    finalListScrollPane.setBounds(150, 30, 200, 250);
-                    listPanel.add(finalListScrollPane);
-                    JButton listButton = new JButton("Подтвердить");
-                    listButton.setBounds(100, 250, 100, 25);
-                    JButton addButton = new JButton("Добавить");
-                    listButton.setBounds(250, 250, 100, 25);
-                    listPanel.add(listButton);
-                    listPanel.add(addButton);
-                    addButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            String selectedValue = list.getSelectedValue();
-                            finalListModel.addElement(selectedValue);
+                    try {
+                        params[0] = (Integer.parseInt(firstRowField.getText()));
+                        params[1] = (Integer.parseInt(allRowsField.getText()));
+                        params[2] = (Integer.parseInt(statRowField.getText()));
+                        params[3] = (Integer.parseInt(startColumnField.getText()));
+                        String[] columnHeaders = new String[objects.get(0).size()];
+                        for (int i = 0; i < objects.get(0).size(); i++) {
+                            columnHeaders[i] = objects.get(0).get(i).toString();
                         }
-                    });
-                    listFrame.setVisible(true);
-                    listButton.addActionListener(new ActionListener() {
-                                                     @Override
-                                                     public void actionPerformed(ActionEvent e) {
-                                                         ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                                         Object[] chosenHeaders = new Object[finalListModel.getSize()];
-                                                         for (int i = 0; i < finalListModel.getSize(); i++) {
-                                                             chosenHeaders[i] = finalListModel.getElementAt(i);
-                                                         }
-                                                         int[] chosenHeaderIndexes = new int[chosenHeaders.length];
-                                                         for (int i = 0; i < chosenHeaders.length; i++) {
-                                                             chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
-                                                         }
-                                                         System.out.println(chosenHeaderIndexes);
-                                                         for (int j = 0; j < objects.size(); j++) {
-                                                             ArrayList<Object> newRow = new ArrayList<>();
-                                                             for (int i : chosenHeaderIndexes) {
-                                                                 newRow.add(objects.get(j).get(i));
-                                                             }
-                                                             newObjects.add(newRow);
-                                                         }
-                                                         objects = newObjects;
-                                                         listFrame.dispose();
-                                                         jFolderChooser.showDialog(null, "Выбрать папку сохранения");
-                                                         File file = new File(jFolderChooser.getSelectedFile().getPath() + ".xlsx");
-                                                         ExcelHandler.exportToExcel(objects, params, columnNames, file);
-                                                         JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
-                                                     }
-                                                 }
-                    );
-                    excelExportFrame.dispose();
+                        JList<String> list = new JList<>(columnHeaders);
+                        JDialog listFrame = new JDialog(excelExportFrame, "Параметры Excel файла", true);
+                        listFrame.setSize(400, 300);
+                        JPanel listPanel = new JPanel();
+                        listFrame.add(listPanel);
+                        JScrollPane listScrollPane = new JScrollPane(list);
+                        listScrollPane.setBounds(50, 30, 200, 250);
+                        listPanel.add(listScrollPane);
+                        DefaultListModel<String> finalListModel = new DefaultListModel<>();
+                        JList<String> finalList = new JList<>(finalListModel);
+                        JScrollPane finalListScrollPane = new JScrollPane(finalList);
+                        finalListScrollPane.setBounds(150, 30, 200, 250);
+                        listPanel.add(finalListScrollPane);
+                        JButton listButton = new JButton("Подтвердить");
+                        listButton.setBounds(100, 250, 100, 25);
+                        JButton addButton = new JButton("Добавить");
+                        listButton.setBounds(250, 250, 100, 25);
+                        listPanel.add(listButton);
+                        listPanel.add(addButton);
+                        addButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                String selectedValue = list.getSelectedValue();
+                                finalListModel.addElement(selectedValue);
+                            }
+                        });
+                        listButton.addActionListener(e13 -> {
+                                    ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                    Object[] chosenHeaders = new Object[finalListModel.getSize()];
+                                    for (int i = 0; i < finalListModel.getSize(); i++) {
+                                        chosenHeaders[i] = finalListModel.getElementAt(i);
+                                    }
+                                    int[] chosenHeaderIndexes = new int[chosenHeaders.length];
+                                    for (int i = 0; i < chosenHeaders.length; i++) {
+                                        chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
+                                    }
+                                    for (int j = 0; j < objects.size(); j++) {
+                                        ArrayList<Object> newRow = new ArrayList<>();
+                                        for (int i : chosenHeaderIndexes) {
+                                            newRow.add(objects.get(j).get(i));
+                                        }
+                                        newObjects.add(newRow);
+                                    }
+                                    objects = newObjects;
+                                    listFrame.dispose();
+                                    jFolderChooser.showDialog(null, "Выбрать папку сохранения");
+                                    File file = new File(jFolderChooser.getSelectedFile().getPath() + ".xlsx");
+                                    ExcelHandler.exportToExcel(objects, params, columnNames, file);
+                                    JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
+                                }
+                        );
+                        excelExportPanel.add(confirmButton);
+                        listFrame.setVisible(true);
+                        excelExportFrame.dispose();
+                    } catch (NumberFormatException formatException) {
+                        JOptionPane.showMessageDialog(excelExportFrame, "Неверный формат указанных данных");
+                    } catch (IndexOutOfBoundsException | IllegalArgumentException argumentException) {
+                        JOptionPane.showMessageDialog(excelExportFrame, "Введены некорректные данные");
+                    }
                 }
+
             });
-            excelExportPanel.add(confirmButton);
+
             excelExportFrame.setVisible(true);
         });
 
         exportCsvButton.addActionListener(e -> {
             int[] params = new int[2];
 
-            JFrame csvExportFrame = new JFrame("Параметры Csv файла");
+            JDialog csvExportFrame = new JDialog(frame, "Параметры Csv файла", true);
             csvExportFrame.setSize(300, 200);
             JPanel csvExportPanel = new JPanel();
             csvExportFrame.add(csvExportPanel);
@@ -463,7 +470,7 @@ public class Interface {
             chooseColumnNames.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    JFrame chooseColumnNames = new JFrame("Ввод названий столбцов");
+                    JDialog chooseColumnNames = new JDialog(csvExportFrame, "Ввод названий столбцов", true);
                     chooseColumnNames.setSize(300, 200);
                     JPanel panel = new JPanel();
                     JLabel label = new JLabel("Введите названия колонок через точку с запятой:");
@@ -502,7 +509,7 @@ public class Interface {
                         columnHeaders[i] = objects.get(0).get(i).toString();
                     }
                     JList<String> list = new JList<>(columnHeaders);
-                    JFrame listFrame = new JFrame("Параметры Excel файла");
+                    JDialog listFrame = new JDialog(csvExportFrame, "Параметры Csv файла", true);
                     listFrame.setSize(400, 300);
                     JPanel listPanel = new JPanel();
                     listFrame.add(listPanel);
@@ -527,40 +534,41 @@ public class Interface {
                             finalListModel.addElement(selectedValue);
                         }
                     });
-                    listFrame.setVisible(true);
-                    listButton.addActionListener(new ActionListener() {
-                                                     @Override
-                                                     public void actionPerformed(ActionEvent e) {
-                                                         ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                                         Object[] chosenHeaders = new Object[finalListModel.getSize()];
-                                                         for (int i = 0; i < finalListModel.getSize(); i++) {
-                                                             chosenHeaders[i] = finalListModel.getElementAt(i);
-                                                         }
-                                                         int[] chosenHeaderIndexes = new int[chosenHeaders.length];
-                                                         for (int i = 0; i < chosenHeaders.length; i++) {
-                                                             chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
-                                                         }
-                                                         System.out.println(chosenHeaderIndexes);
-                                                         for (int j = 0; j < objects.size(); j++) {
-                                                             ArrayList<Object> newRow = new ArrayList<>();
-                                                             for (int i : chosenHeaderIndexes) {
-                                                                 newRow.add(objects.get(j).get(i));
-                                                             }
-                                                             newObjects.add(newRow);
-                                                         }
-                                                         objects = newObjects;
-                                                         listFrame.dispose();
-                                                         jFolderChooser.showDialog(null, "Выбрать папку сохранения");
-                                                         File file = new File(jFolderChooser.getSelectedFile().getPath() + ".csv");
-                                                         try {
-                                                             CsvHandler.ExportToCsv(objects, params, columnNames, file);
-                                                         } catch (IOException ex) {
-                                                             throw new RuntimeException(ex);
-                                                         }
-                                                         JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
-                                                     }
-                                                 }
+                    listButton.addActionListener(e14 -> {
+                                ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                Object[] chosenHeaders = new Object[finalListModel.getSize()];
+                                for (int i = 0; i < finalListModel.getSize(); i++) {
+                                    chosenHeaders[i] = finalListModel.getElementAt(i);
+                                }
+                                int[] chosenHeaderIndexes = new int[chosenHeaders.length];
+                                for (int i = 0; i < chosenHeaders.length; i++) {
+                                    chosenHeaderIndexes[i] = objects.get(0).indexOf(chosenHeaders[i]);
+                                }
+                                System.out.println(chosenHeaderIndexes);
+                                for (int j = 0; j < objects.size(); j++) {
+                                    ArrayList<Object> newRow = new ArrayList<>();
+                                    for (int i : chosenHeaderIndexes) {
+                                        newRow.add(objects.get(j).get(i));
+                                    }
+                                    newObjects.add(newRow);
+                                }
+                                objects = newObjects;
+                                listFrame.dispose();
+                                jFolderChooser.showDialog(null, "Выбрать папку сохранения");
+                                File file = new File(jFolderChooser.getSelectedFile().getPath() + ".csv");
+                                try {
+                                    CsvHandler.ExportToCsv(objects, params, columnNames, file);
+                                } catch (IOException ex) {
+                                    JOptionPane.showMessageDialog(csvExportFrame, "Некорректный файл");
+                                } catch (NumberFormatException formatException) {
+                                    JOptionPane.showMessageDialog(csvExportFrame, "Неверный формат указанных данных");
+                                } catch (IndexOutOfBoundsException | IllegalArgumentException argumentException) {
+                                    JOptionPane.showMessageDialog(csvExportFrame, "Введены некорректные данные");
+                                }
+                                JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
+                            }
                     );
+                    listFrame.setVisible(true);
                     csvExportFrame.dispose();
                 }
             });
