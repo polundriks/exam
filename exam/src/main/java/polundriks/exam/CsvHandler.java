@@ -2,12 +2,10 @@ package polundriks.exam;
 
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvException;
-
 import org.mozilla.universalchardet.UniversalDetector;
 
 import java.io.*;
 import java.nio.charset.Charset;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,21 +14,19 @@ import java.util.Objects;
 public class CsvHandler {
 
     public static ArrayList<ArrayList<Object>> CsvImport(File file, int startRow, int rowCount) throws IOException, CsvException {
-
-        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
-        CSVReader csvReader = new CSVReaderBuilder(new FileReader(file)).withCSVParser(parser).build();
-        ArrayList<ArrayList<Object>> data = new ArrayList<>();
-        List<String[]> rows = csvReader.readAll();
-        String detectedCharset = "";
+        String detectedCharset = null;
         try {
             InputStream in = new FileInputStream(file);
             Charset charset = detectCharset(in);
             detectedCharset = charset.displayName();
+            System.out.println(detectedCharset);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+        CSVReader csvReader = new CSVReaderBuilder(new FileReader(file, Charset.forName(detectedCharset))).withCSVParser(parser).build();
+        ArrayList<ArrayList<Object>> data = new ArrayList<>();
+        List<String[]> rows = csvReader.readAll();
         while (Objects.equals(rows.get(0)[0], "")) {
             rows.remove(0);
         }
@@ -41,10 +37,6 @@ public class CsvHandler {
                     rows.get(i)[j] = rows.get(i)[j - t] + t;
                     t++;
                 }
-                else if (Objects.equals(detectedCharset, "IBM866")){
-                    String test = new String(rows.get(i)[j].getBytes(),"CP866");
-                    rows.get(i)[j] = test;
-                }
             }
             t = 1;
             objectRow.addAll(Arrays.asList(rows.get(i)));
@@ -53,6 +45,7 @@ public class CsvHandler {
         System.out.println(data);
         return data;
     }
+
     private static Charset detectCharset(InputStream in) throws IOException {
         byte[] buf = new byte[4096];
         UniversalDetector detector = new UniversalDetector(null);
