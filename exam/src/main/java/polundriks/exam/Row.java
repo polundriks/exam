@@ -13,10 +13,17 @@ import lombok.Data;
 
 import java.util.ArrayList;
 
+/**
+ * The {@code Row} class represents a row in a table, containing a list of
+ * cells.
+ */
 @Data
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Row {
     @XmlElementWrapper(name = "allCells")
     @XmlElement(name = "cell")
+    /**
+     * The list of cells in the row.
+     */
     ArrayList<Cell> cells = new ArrayList<>();
 }

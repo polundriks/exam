@@ -18,7 +18,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * The {@code ExcelHandler} class provides methods for importing data from Excel files and exporting data to Excel files.
+ */
+
 public class ExcelHandler {
+    
+    /**
+     * Imports data from the specified Excel file.
+     *
+     * @param file       the Excel file to import data from
+     * @param sheetIndex the index of the sheet to import data from
+     * @param startRow   the starting row index from which to begin importing
+     * @param startColumn the starting column index from which to begin importing
+     * @param rowCount   the number of rows to import
+     * @return an ArrayList containing the imported data as a list of lists of Objects
+     * @throws IOException            if an I/O error occurs
+     * @throws InvalidFormatException if the format of the Excel file is invalid
+     */
 
     public static ArrayList<ArrayList<Object>> importFromExcel(File file, int sheetIndex, int startRow, int startColumn, int rowCount) throws IOException, InvalidFormatException {
         XSSFWorkbook book = new XSSFWorkbook(file);
@@ -52,6 +69,17 @@ public class ExcelHandler {
         return data;
     }
 
+     /**
+     * Exports data to the specified Excel file.
+     *
+     * @param objects     the data to export as a list of lists of Objects
+     * @param startRow    the starting row index for exporting
+     * @param rowCount    the number of rows to export
+     * @param exportRow   the row index to start exporting data in the Excel file
+     * @param exportColumn the column index to start exporting data in the Excel file
+     * @param columnNames an array of column names to include in the Excel file
+     * @param file        the Excel file to export data to
+     */
     public static void exportToExcel(ArrayList<ArrayList<Object>> objects, int startRow, int rowCount, int exportRow, int exportColumn, String[] columnNames, File file) {
         XSSFWorkbook book = new XSSFWorkbook();
         XSSFSheet sheet = book.createSheet();

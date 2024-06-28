@@ -11,7 +11,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The CsvHandler class provides methods for importing data from CSV files and exporting data to CSV files.
+ */
+
 public class CsvHandler {
+    
+    /**
+     * Imports data from the specified CSV file.
+     * @param startRow row from which import begins
+     * @param rowCount amount of rows
+     * @param file     the CSV file to import data from
+     * @return an ArrayList containing the imported data as a list of lists
+     * @throws IOException   if an I/O error occurs
+     * @throws CsvException if an exception is encountered while parsing the CSV file
+     */
 
     public static ArrayList<ArrayList<Object>> CsvImport(File file, int startRow, int rowCount) throws IOException, CsvException {
         String detectedCharset = null;
@@ -20,7 +34,7 @@ public class CsvHandler {
             Charset charset = detectCharset(in);
             detectedCharset = charset.displayName();
             System.out.println(detectedCharset);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
@@ -45,6 +59,14 @@ public class CsvHandler {
         System.out.println(data);
         return data;
     }
+    
+    /**
+     * Detects the charset of the given input stream.
+     *
+     * @param in the input stream to detect the charset from
+     * @return the charset detected from the input stream
+     * @throws IOException if an I/O error occurs
+     */
 
     private static Charset detectCharset(InputStream in) throws IOException {
         byte[] buf = new byte[4096];
@@ -63,7 +85,18 @@ public class CsvHandler {
             return Charset.forName(encoding);
         }
     }
-
+    
+    /**
+     * Exports data to the specified CSV file.
+     *
+     * @param objects     the data to export as a list of lists
+     * @param startRow    the starting row index for exporting
+     * @param rowCount    the number of rows to export
+     * @param columnNames the column names to include in the CSV file
+     * @param file        the CSV file to export data to
+     * @throws IOException if an I/O error occurs
+     */
+    
     public static void ExportToCsv(ArrayList<ArrayList<Object>> objects, int startRow, int rowCount, String[] columnNames, File file) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter(file));
         for (int i = 0; i < startRow - 1; i++) {

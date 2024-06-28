@@ -19,8 +19,20 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+/**
+ * The {@code XmlHandler} class provides methods for exporting data to XML files.
+ */
+
 public class XmlHandler {
 
+     /**
+     * Exports the provided data to an XML file.
+     *
+     * @param data the data to be exported as a list of lists of Objects
+     * @param file the File object representing the destination XML file
+     * @throws IOException   if an I/O error occurs
+     * @throws JAXBException if an error occurs during XML marshalling
+     */
     public void exportToXml(ArrayList<ArrayList<Object>> data, File file) throws IOException, JAXBException {
         Table table = new Table();
         for (ArrayList<Object> objectRow : data) {

@@ -18,12 +18,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Interface {
+
     private static JFrame frame;
     private static JPanel panel;
-    private JTextField textField1;
-    private JPanel panel1;
-    private JComboBox comboBox1;
-    private static JTable table = new JTable();
+//    private JTextField textField1;
+//    private JPanel panel1;
+//    private JComboBox comboBox1;
+    private static final JTable table = new JTable();
     private static DefaultTableModel tableModel;
     private static final JFileChooser jFolderChooser = new JFileChooser();
 
@@ -36,7 +37,18 @@ public class Interface {
     static int exportRow;
     static int exportColumn;
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
+//        frame = new JFrame("File Chooser Example");
+//        frame.setSize(800, 700);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//
+//        panel = new JPanel();
+//        frame.add(panel);
+//        placeComponents(panel);
+//
+//        frame.setVisible(true);
+//    }
+    public void initInterface() {
         frame = new JFrame("File Chooser Example");
         frame.setSize(800, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,6 +90,11 @@ public class Interface {
         exportXmlButton.setBounds(250, 600, 250, 25);
         panel.add(exportXmlButton);
         exportXmlButton.addActionListener(e -> {
+            if (objects == null || objects.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Нечего экспортировать");
+                return;
+            }
+
             jFolderChooser.showDialog(frame, "Выбрать папку сохранения");
             File file = new File(jFolderChooser.getSelectedFile().getPath() + ".xml");
             try {
@@ -93,7 +110,6 @@ public class Interface {
 
         });
         excelButton.addActionListener(e -> {
-
 
             JFileChooser excelFileChooser = new JFileChooser(new File(".\\src\\main\\resources"));
             FileNameExtensionFilter filter = new FileNameExtensionFilter("", "xlsx");
@@ -162,31 +178,32 @@ public class Interface {
                             listPanel.add(listButton);
                             listPanel.add(addButton);
                             addButton.addActionListener(new ActionListener() {
+                                @Override
                                 public void actionPerformed(ActionEvent e) {
                                     String selectedValue = list.getSelectedValue();
                                     finalListModel.addElement(selectedValue);
                                 }
                             });
                             listButton.addActionListener(e1 -> {
-                                        ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                        int[] chosenHeaders = new int[finalListModel.getSize()];
-                                        for (int i = 0; i < finalListModel.getSize(); i++) {
-                                            chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
-                                        }
-                                        for (int j = 0; j < objects.size(); j++) {
-                                            ArrayList<Object> newRow = new ArrayList<>();
-                                            for (int i : chosenHeaders) {
-                                                newRow.add(objects.get(j).get(i - startColumn + 1));
-                                            }
-                                            newObjects.add(newRow);
-                                        }
-                                        objects = newObjects;
-                                        showTable();
-                                        exportExcelButton.setEnabled(true);
-                                        exportCsvButton.setEnabled(true);
-                                        excelFrame.dispose();
-                                        listFrame.dispose();
+                                ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                int[] chosenHeaders = new int[finalListModel.getSize()];
+                                for (int i = 0; i < finalListModel.getSize(); i++) {
+                                    chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
+                                }
+                                for (int j = 0; j < objects.size(); j++) {
+                                    ArrayList<Object> newRow = new ArrayList<>();
+                                    for (int i : chosenHeaders) {
+                                        newRow.add(objects.get(j).get(i - startColumn + 1));
                                     }
+                                    newObjects.add(newRow);
+                                }
+                                objects = newObjects;
+                                showTable();
+                                exportExcelButton.setEnabled(true);
+                                exportCsvButton.setEnabled(true);
+                                excelFrame.dispose();
+                                listFrame.dispose();
+                            }
                             );
                             listFrame.setVisible(true);
                         } catch (IOException | InvalidFormatException ex) {
@@ -202,7 +219,6 @@ public class Interface {
                 excelPanel.add(confirmButton);
                 excelFrame.setVisible(true);
             }
-
 
         });
 
@@ -265,31 +281,32 @@ public class Interface {
                             listPanel.add(listButton);
                             listPanel.add(addButton);
                             addButton.addActionListener(new ActionListener() {
+                                @Override
                                 public void actionPerformed(ActionEvent e) {
                                     String selectedValue = list.getSelectedValue();
                                     finalListModel.addElement(selectedValue);
                                 }
                             });
                             listButton.addActionListener(e12 -> {
-                                        ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                        int[] chosenHeaders = new int[finalListModel.getSize()];
-                                        for (int i = 0; i < finalListModel.getSize(); i++) {
-                                            chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
-                                        }
-                                        for (int j = 0; j < objects.size(); j++) {
-                                            ArrayList<Object> newRow = new ArrayList<>();
-                                            for (int i : chosenHeaders) {
-                                                newRow.add(objects.get(j).get(i));
-                                            }
-                                            newObjects.add(newRow);
-                                        }
-                                        objects = newObjects;
-                                        showTable();
-                                        listFrame.dispose();
-                                        csvFrame.dispose();
-                                        exportExcelButton.setEnabled(true);
-                                        exportCsvButton.setEnabled(true);
+                                ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                                int[] chosenHeaders = new int[finalListModel.getSize()];
+                                for (int i = 0; i < finalListModel.getSize(); i++) {
+                                    chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
+                                }
+                                for (int j = 0; j < objects.size(); j++) {
+                                    ArrayList<Object> newRow = new ArrayList<>();
+                                    for (int i : chosenHeaders) {
+                                        newRow.add(objects.get(j).get(i));
                                     }
+                                    newObjects.add(newRow);
+                                }
+                                objects = newObjects;
+                                showTable();
+                                listFrame.dispose();
+                                csvFrame.dispose();
+                                exportExcelButton.setEnabled(true);
+                                exportCsvButton.setEnabled(true);
+                            }
                             );
                             listFrame.setVisible(true);
                         } catch (IOException | CsvException ex) {
@@ -395,31 +412,32 @@ public class Interface {
                         listPanel.add(listButton);
                         listPanel.add(addButton);
                         addButton.addActionListener(new ActionListener() {
+                            @Override
                             public void actionPerformed(ActionEvent e) {
                                 String selectedValue = list.getSelectedValue();
                                 finalListModel.addElement(selectedValue);
                             }
                         });
                         listButton.addActionListener(e13 -> {
-                                    ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
-                                    int[] chosenHeaders = new int[finalListModel.getSize()];
-                                    for (int i = 0; i < finalListModel.getSize(); i++) {
-                                        chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
-                                    }
-                                    for (int j = 0; j < objects.size(); j++) {
-                                        ArrayList<Object> newRow = new ArrayList<>();
-                                        for (int i : chosenHeaders) {
-                                            newRow.add(objects.get(j).get(i - startColumn + 1));
-                                        }
-                                        newObjects.add(newRow);
-                                    }
-                                    objects = newObjects;
-                                    listFrame.dispose();
-                                    jFolderChooser.showDialog(null, "Выбрать папку сохранения");
-                                    File file = new File(jFolderChooser.getSelectedFile().getPath() + ".xlsx");
-                                    ExcelHandler.exportToExcel(objects, startRow, rowCount, exportRow, exportColumn, columnNames, file);
-                                    JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
+                            ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
+                            int[] chosenHeaders = new int[finalListModel.getSize()];
+                            for (int i = 0; i < finalListModel.getSize(); i++) {
+                                chosenHeaders[i] = (Integer.parseInt(finalListModel.getElementAt(i).substring(8)) - 1);
+                            }
+                            for (int j = 0; j < objects.size(); j++) {
+                                ArrayList<Object> newRow = new ArrayList<>();
+                                for (int i : chosenHeaders) {
+                                    newRow.add(objects.get(j).get(i - startColumn + 1));
                                 }
+                                newObjects.add(newRow);
+                            }
+                            objects = newObjects;
+                            listFrame.dispose();
+                            jFolderChooser.showDialog(null, "Выбрать папку сохранения");
+                            File file = new File(jFolderChooser.getSelectedFile().getPath() + ".xlsx");
+                            ExcelHandler.exportToExcel(objects, startRow, rowCount, exportRow, exportColumn, columnNames, file);
+                            JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
+                        }
                         );
                         excelExportPanel.add(confirmButton);
                         listFrame.setVisible(true);
@@ -487,38 +505,45 @@ public class Interface {
             confirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    startRow = (Integer.parseInt(startRowField.getText()));
-                    rowCount = (Integer.parseInt(allRowsField.getText()));
-                    String[] columnHeaders = new String[objects.get(0).size()];
-                    for (int i = 0; i < objects.get(0).size(); i++) {
-                        columnHeaders[i] = "Столбец " + (i + 1);
-                    }
-                    JList<String> list = new JList<>(columnHeaders);
-                    JDialog listFrame = new JDialog(csvExportFrame, "Параметры Csv файла", true);
-                    listFrame.setSize(400, 300);
-                    JPanel listPanel = new JPanel();
-                    listFrame.add(listPanel);
-                    JScrollPane listScrollPane = new JScrollPane(list);
-                    listScrollPane.setBounds(50, 30, 200, 250);
-                    listPanel.add(listScrollPane);
-                    DefaultListModel<String> finalListModel = new DefaultListModel<>();
-                    JList<String> finalList = new JList<>(finalListModel);
-                    JScrollPane finalListScrollPane = new JScrollPane(finalList);
-                    finalListScrollPane.setBounds(150, 30, 200, 250);
-                    listPanel.add(finalListScrollPane);
-                    JButton listButton = new JButton("Подтвердить");
-                    listButton.setBounds(100, 250, 100, 25);
-                    JButton addButton = new JButton("Добавить");
-                    listButton.setBounds(250, 250, 100, 25);
-                    listPanel.add(listButton);
-                    listPanel.add(addButton);
-                    addButton.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            String selectedValue = list.getSelectedValue();
-                            finalListModel.addElement(selectedValue);
-                        }
-                    });
-                    listButton.addActionListener(e14 -> {
+                    try {
+                        startRow = Integer.parseInt(startRowField.getText());
+                        rowCount = Integer.parseInt(allRowsField.getText());
+
+                        if (startRow <= 0 || rowCount <= 0) {
+                            JOptionPane.showMessageDialog(csvExportFrame, "Введены некорректные данные, введите положительные числа");
+                        } else {
+                            String[] columnHeaders = new String[objects.get(0).size()];
+                            for (int i = 0; i < objects.get(0).size(); i++) {
+                                columnHeaders[i] = "Столбец " + (i + 1);
+                            }
+
+                            JList<String> list = new JList<>(columnHeaders);
+                            JDialog listFrame = new JDialog(csvExportFrame, "Параметры Csv файла", true);
+                            listFrame.setSize(400, 300);
+                            JPanel listPanel = new JPanel();
+                            listFrame.add(listPanel);
+                            JScrollPane listScrollPane = new JScrollPane(list);
+                            listScrollPane.setBounds(50, 30, 200, 250);
+                            listPanel.add(listScrollPane);
+                            DefaultListModel<String> finalListModel = new DefaultListModel<>();
+                            JList<String> finalList = new JList<>(finalListModel);
+                            JScrollPane finalListScrollPane = new JScrollPane(finalList);
+                            finalListScrollPane.setBounds(150, 30, 200, 250);
+                            listPanel.add(finalListScrollPane);
+                            JButton listButton = new JButton("Подтвердить");
+                            listButton.setBounds(100, 250, 100, 25);
+                            JButton addButton = new JButton("Добавить");
+                            listButton.setBounds(250, 250, 100, 25);
+                            listPanel.add(listButton);
+                            listPanel.add(addButton);
+                            addButton.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    String selectedValue = list.getSelectedValue();
+                                    finalListModel.addElement(selectedValue);
+                                }
+                            });
+                            listButton.addActionListener(e14 -> {
                                 ArrayList<ArrayList<Object>> newObjects = new ArrayList<>();
                                 int[] chosenHeaders = new int[finalListModel.getSize()];
                                 for (int i = 0; i < finalListModel.getSize(); i++) {
@@ -546,16 +571,21 @@ public class Interface {
                                 }
                                 JOptionPane.showMessageDialog(frame, "Экспорт завершен успешно");
                             }
-                    );
-                    listFrame.setVisible(true);
-                    csvExportFrame.dispose();
+                            );
+                            listFrame.setVisible(true);
+                            csvExportFrame.dispose();
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(csvExportFrame, "Некорректный формат ввода чисел.");
+                    }
                 }
             });
-            csvExportPanel.add(confirmButton);
-            csvExportFrame.setVisible(true);
-        });
-    }
+        
+        csvExportPanel.add(confirmButton);
 
+        csvExportFrame.setVisible(true);
+   });  
+    }
     private static void showTable() {
 
         Object[] columnNames = objects.get(0).toArray();

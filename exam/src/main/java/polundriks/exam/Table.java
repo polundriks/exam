@@ -8,16 +8,23 @@ package polundriks.exam;
  *
  * @author super
  */
-
 import jakarta.xml.bind.annotation.*;
 import lombok.Data;
 
 import java.util.ArrayList;
+
+/**
+ * The {@code Table} class represents a table containing multiple rows.
+ */
 @Data
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Table {
+
     @XmlElementWrapper(name = "allRows")
     @XmlElement(name = "row")
+    /**
+     * The list of rows in the table.
+     */
     ArrayList<Row> rows = new ArrayList<>();
 }

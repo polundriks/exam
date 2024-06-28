@@ -9,7 +9,10 @@ package polundriks.exam;
  * @author super
  */
 import jakarta.xml.bind.annotation.XmlElement;
-
+/**
+     * Constructs a cell with the specified content type.
+     *
+     */
 public abstract class Cell {
     @XmlElement(name = "type")
     String contentType;
